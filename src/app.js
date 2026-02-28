@@ -1,21 +1,32 @@
+require("dotenv").config();
 const express = require('express');
+const connectDB = require('./config/database')
+const User = require('./models/user')
 const app = express();
-const {adminAuth,userAuth} = require('./middleware/adminAuth')
-app.use("/admin",adminAuth)
-app.get("/admin/getAllAdmin",(req,res)=>{
-    res.send("get all user")
+
+app.post("/signup",async (req,res)=>{
+    const userObj = {
+        firstName : 'Virat',
+        lastName :'Kohli',
+        email: "kohli@gmail.com",
+        password : '12345'
+    }
+    const user = new User(userObj)
+    try{  
+      await user.save()
+      res.send("user added successfully")
+    }catch(err){
+      res.status(400).send("something went wrong")
+    }
 })
-app.delete("/admin/deleteAllAdmin",(req,res)=>{
-    res.send("delete all user")
-})
-app.get("/user",userAuth,(req,res)=>{
-    console.log("get every user")
-    res.send("get every user")
-})
-app.get("/user/login",(req,res)=>{
-    console.log("user logged in")
-    res.send("user logged in")
-})
-app.listen(3000,()=>{
-console.log("server created")
-});
+connectDB()
+  .then(() => {
+    console.log("database connection established...");
+    app.listen(3000, () => {
+      console.log("server created");
+    });
+  })
+  .catch((err) => {
+    console.log("database connection not established...", err.message);
+  });
+
