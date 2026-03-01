@@ -6,16 +6,24 @@ const app = express();
 
 app.use(express.json())
 app.post("/signup",async (req,res)=>{
-    const user = new User(req.body)
-    try{
-      await user.save()
-      res.send("user added successfully")
-    }catch(err){
-      if (err.code === 11000) {
-        return res.status(400).send("Email already registered")
-      }
-      res.status(400).send("Validation failed: " + err.message)
+  try{
+    const email = req.body.email?.toLowerCase?.()?.trim() || req.body.email;
+    if (!email) {
+      return res.status(400).send("Email is required");
     }
+    const existing = await User.findOne({ email });
+    if (existing) {
+      return res.status(400).send("Email already registered");
+    }
+    const user = new User(req.body);
+    await user.save();
+    res.send("user added successfully");
+  }catch(err){
+    if (err.code === 11000) {
+      return res.status(400).send("Email already registered");
+    }
+    res.status(400).send("Validation failed: " + err.message);
+  }
 });
 app.get("/user",async (req,res)=>{
     //const user = new User(req.body.emailId)
@@ -54,29 +62,29 @@ app.delete("/deleteUser",async (req,res)=>{
 app.patch("/updateUser/:userId",async (req,res)=>{
   const userId = req.params.userId;
   const data =  req.body;
-    try{
-      const isUpdateAllowed = ['gender','age','skills'];
-      const isUpdated = Object.keys(data).every((k)=>
-        isUpdateAllowed.includes(k)
-      );
-      if(!isUpdated){
-        throw new Error("not valid request")
-      }
-      if(data.skills.length > 10){
-        throw new Error("skills should be less than 10")
-      }
-      await User.findByIdAndUpdate(
-        userId,
-        data,
-        { runValidators: true, new: true }
-      )
-      res.send("user updated successfully")
-    }catch(err){
-      if (err.code === 11000) {
-        return res.status(400).send("Email already registered")
-      }
-      res.status(400).send("Validation failed: " + err.message)
+  try{
+    const isUpdateAllowed = ['gender','age','skills','email'];
+    const isUpdated = Object.keys(data).every((k) =>
+      isUpdateAllowed.includes(k)
+    );
+    if(!isUpdated){
+      throw new Error("not valid request")
     }
+    if(data.skills && data.skills.length > 10){
+      throw new Error("skills should be less than 10")
+    }
+    await User.findByIdAndUpdate(
+      userId,
+      data,
+      { runValidators: true, new: true }
+    )
+    res.send("user updated successfully")
+  }catch(err){
+    if (err.code === 11000) {
+      return res.status(400).send("Email already registered")
+    }
+    res.status(400).send("Validation failed: " + err.message)
+  }
 })
 
 connectDB()
