@@ -7,11 +7,14 @@ const app = express();
 app.use(express.json())
 app.post("/signup",async (req,res)=>{
     const user = new User(req.body)
-    try{  
+    try{
       await user.save()
       res.send("user added successfully")
     }catch(err){
-      res.status(400).send("something went wrong")
+      if (err.code === 11000) {
+        return res.status(400).send("Email already registered")
+      }
+      res.status(400).send("Validation failed: " + err.message)
     }
 });
 app.get("/user",async (req,res)=>{
@@ -49,11 +52,18 @@ app.delete("/deleteUser",async (req,res)=>{
     }
 });
 app.patch("/updateUser",async (req,res)=>{
-    try{  
-      const user = await User.findByIdAndUpdate({_id:req.body.userId},req.body);
+    try{
+      await User.findByIdAndUpdate(
+        req.body.userId,
+        req.body,
+        { runValidators: true, new: true }
+      )
       res.send("user updated successfully")
     }catch(err){
-      res.status(400).send("something went wrong",err)
+      if (err.code === 11000) {
+        return res.status(400).send("Email already registered")
+      }
+      res.status(400).send("Validation failed: " + err.message)
     }
 })
 
