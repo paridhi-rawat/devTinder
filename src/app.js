@@ -2,12 +2,14 @@ require("dotenv").config();
 const express = require('express');
 const connectDB = require('./config/database')
 const User = require('./models/user')
+const bcrypt = require("bcrypt")
 const app = express();
 
 app.use(express.json())
 app.post("/signup",async (req,res)=>{
   try{
-    const email = req.body.email?.toLowerCase?.()?.trim() || req.body.email;
+   // const email = req.body.email?.toLowerCase?.()?.trim() || req.body.email;
+    const {firstName,lastName,email,password} = req.body;
     if (!email) {
       return res.status(400).send("Email is required");
     }
@@ -15,7 +17,16 @@ app.post("/signup",async (req,res)=>{
     if (existing) {
       return res.status(400).send("Email already registered");
     }
-    const user = new User(req.body);
+
+    // encrypt password
+    const passwordHash = await bcrypt.hash(password,10)
+
+    const user = new User({
+      firstName,
+      lastName,
+      email,
+      password:passwordHash
+    });
     await user.save();
     res.send("user added successfully");
   }catch(err){
