@@ -35,7 +35,10 @@ const userSchema = new mongoose.Schema({
     photo :{
         type: String,
         default:"https://www.freepik.com/premium-vector/user-icon-icon_323262343.htm",
-    }
+    },
+    skills:{
+        type:[String],
+    },
 },
 {
     timestamps:true,

@@ -51,11 +51,23 @@ app.delete("/deleteUser",async (req,res)=>{
       res.status(400).send("something went wrong")
     }
 });
-app.patch("/updateUser",async (req,res)=>{
+app.patch("/updateUser/:userId",async (req,res)=>{
+  const userId = req.params.userId;
+  const data =  req.body;
     try{
+      const isUpdateAllowed = ['gender','age','skills'];
+      const isUpdated = Object.keys(data).every((k)=>
+        isUpdateAllowed.includes(k)
+      );
+      if(!isUpdated){
+        throw new Error("not valid request")
+      }
+      if(data.skills.length > 10){
+        throw new Error("skills should be less than 10")
+      }
       await User.findByIdAndUpdate(
-        req.body.userId,
-        req.body,
+        userId,
+        data,
         { runValidators: true, new: true }
       )
       res.send("user updated successfully")
