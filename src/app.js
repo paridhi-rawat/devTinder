@@ -97,6 +97,28 @@ app.patch("/updateUser/:userId",async (req,res)=>{
     res.status(400).send("Validation failed: " + err.message)
   }
 })
+app.post("/login",async (req,res)=>{
+  try{
+   // const email = req.body.email?.toLowerCase?.()?.trim() || req.body.email;
+    const {email,password} = req.body;
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      throw new Error("email not present")
+    }
+
+    // encrypt password
+    const passwordHash = await bcrypt.compare(password,user.password)
+     if (!passwordHash) {
+      throw new Error("password is incorrect")
+    }
+    res.send("user successfully logged in");
+  }catch(err){
+    if (err.code === 11000) {
+      return res.status(400).send("Email already registered");
+    }
+    res.status(400).send("Validation failed: " + err.message);
+  }
+});
 
 connectDB()
   .then(() => {
