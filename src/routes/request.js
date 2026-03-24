@@ -54,7 +54,7 @@ requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req, res)
     }
 });
 
-requestRouter.post("/request/send/:status/:requestId", userAuth, async (req, res) => {
+requestRouter.post("/request/review/:status/:requestId", userAuth, async (req, res) => {
     try{
         const {status,requestId} = req.params;
         const loggedInUser = req.user
@@ -80,7 +80,7 @@ requestRouter.post("/request/send/:status/:requestId", userAuth, async (req, res
         connectionRequest.status = status;
         const data = await connectionRequest.save();
         res.json({
-            message : "Connection request accepted/rejected",
+            message : "Connection request"+ status,
             data
         });
         }
