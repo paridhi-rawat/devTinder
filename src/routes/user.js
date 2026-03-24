@@ -21,4 +21,24 @@ userRouter.get("/user/requests/received", userAuth, async (req, res) => {
       res.status(400).send("something went wrong"+ err.message)
     }
 })
+
+userRouter.get("/user/connections", userAuth, async (req, res)=>{
+  try{
+    const loggedInUser = req.user
+      const connectionRequests = await connectionRequestModel.find({
+        $or : [
+            {toUserId: loggedInUser._id, status : 'accepted'},
+            {fromUserId: loggedInUser._id, status : 'accepted'}
+        ]
+      }).populate("fromUserId", "firstName lastName photo skills")
+
+      const newdata = connectionRequests.map((row) => row.fromUserId)
+      res.json({
+        message : "Data fetched successfully",
+        data: newdata
+      })
+  }catch(err){
+    res.status(400).send("something went wrong"+ err.message)
+  }
+})
 module.exports = userRouter;
