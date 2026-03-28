@@ -51,7 +51,7 @@ authRouter.post("/login",async (req,res)=>{
      if (passwordHash) {
       const token = await jwt.sign({_id:user._id},"DevTinder@123");
       res.cookie("token",token)
-      res.send("user successfully logged in");
+      res.send(user);
       
     }else{
       throw new Error("password is incorrect")
