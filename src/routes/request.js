@@ -69,24 +69,23 @@ requestRouter.post("/request/review/:status/:requestId", userAuth, async (req, r
         const connectionRequest = await ConnectionRequest.findOne({
             _id : requestId,
             toUserId : loggedInUser._id,
-            status: 'Interested'
+            status: 'interested'
         })
         if(!connectionRequest){
-             res.status(404)
-            .json({
-            message: "connection not found"
-        });
+            return res.status(404).json({
+                message: "connection not found"
+            });
+        }
 
         connectionRequest.status = status;
         const data = await connectionRequest.save();
         res.json({
-            message : "Connection request"+ status,
+            message : "Connection request "+ status,
             data
         });
-        }
 
     }catch(e){
-      const message = err.message || "something went wrong";
+      const message = e.message || "something went wrong";
       res.status(400).json({ error: message });
     }
 });    
